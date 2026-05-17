@@ -22,7 +22,7 @@ public class WorkflowStep {
 
     public void setName(String name) {
         if (name == null || name.trim().length() == 0) {
-            throw new IllegalArgumentException("A név nem lehet üres.");
+            throw new IllegalArgumentException("nev nem lehet ures");
         }
         this.name = name;
     }
@@ -33,7 +33,7 @@ public class WorkflowStep {
 
     public void setPrompt(String prompt) {
         if (prompt == null || prompt.trim().length() == 0) {
-            throw new IllegalArgumentException("A prompt nem lehet üres.");
+            throw new IllegalArgumentException("prompt hianyzik");
         }
         this.prompt = prompt;
     }
@@ -44,7 +44,7 @@ public class WorkflowStep {
 
     public void setSystemPrompt(String systemPrompt) {
         if (systemPrompt == null || systemPrompt.trim().length() == 0) {
-            throw new IllegalArgumentException("A systemPrompt nem lehet üres.");
+            throw new IllegalArgumentException("systemprompt ures");
         }
         this.systemPrompt = systemPrompt;
     }
@@ -55,7 +55,7 @@ public class WorkflowStep {
 
     public void setStructuredOutput(StructuredOutput structuredOutput) {
         if (structuredOutput == null) {
-            throw new IllegalArgumentException("A structuredOutput nem lehet null.");
+            throw new IllegalArgumentException("output nem lehet null");
         }
         this.structuredOutput = structuredOutput;
     }
@@ -75,23 +75,22 @@ public class WorkflowStep {
             return "";
         }
 
-        SchemaType primaryType = this.structuredOutput.getSchemaTypes()[0];
+        SchemaType t = this.structuredOutput.getSchemaTypes()[0];
 
-        if (primaryType == SchemaType.INT) {
+        if (t == SchemaType.INT) {
             return "0";
-        } else if (primaryType == SchemaType.STRING) {
+        } else if (t == SchemaType.STRING) {
             return "sample";
-        } else if (primaryType == SchemaType.BOOLEAN) {
+        } else if (t == SchemaType.BOOLEAN) {
             return "true";
-        } else if (primaryType == SchemaType.LIST_INT) {
+        } else if (t == SchemaType.LIST_INT) {
             return "[1,2,3]";
-        } else if (primaryType == SchemaType.LIST_STRING) {
+        } else if (t == SchemaType.LIST_STRING) {
             return "[\"a\",\"b\"]";
-        } else if (primaryType == SchemaType.MAP_STRING_STRING) {
-            return "{\"kulcs\":\"érték\"}";
+        } else if (t == SchemaType.MAP_STRING_STRING) {
+            return "{\"kulcs\":\"ertek\"}";
         } else {
             return "";
         }
     }
-    
 }

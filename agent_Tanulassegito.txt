@@ -1,0 +1,19 @@
+AGENT: TanulasSegito
+STEP
+name=Temabontas
+prompt=bontsd fel a temat 5 fontosabb reszre
+systemPrompt=te egy turelmes tanar vagy
+output=LIST_STRING
+ENDSTEP
+STEP
+name=Kulcsszavak
+prompt=gyujtsd ki a legfontosabb fogalmakat es magyarazatukat
+systemPrompt=legyel rovid es lenyegre toro
+output=MAP_STRING_STRING
+ENDSTEP
+STEP
+name=Kviz
+prompt=generalj egy igaz-hamis kerdest az elso reszbol
+systemPrompt=vizsgaztato modban valaszolj
+output=BOOLEAN
+ENDSTEP

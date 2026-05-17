@@ -5,11 +5,12 @@ public class StructuredOutput {
 
     public StructuredOutput(SchemaType[] schemaTypes) {
         if (schemaTypes == null || schemaTypes.length == 0) {
-            throw new IllegalArgumentException("legalább egy sématípust meg kell adni.");
+            throw new IllegalArgumentException("ures vagy null tomb lett megadva");
         }
+        
         for (int i = 0; i < schemaTypes.length; i++) {
             if (schemaTypes[i] == null) {
-                throw new NullPointerException("a megadott sématípusok között nem lehet null.");
+                throw new NullPointerException("van egy null a megadott tipusok kozott");
             }
         }
         
@@ -20,9 +21,9 @@ public class StructuredOutput {
     }
 
     public SchemaType[] getSchemaTypes() {
-        SchemaType[] masolat = new SchemaType[this.schemaTypes.length];
-        for (int i = 0; i < this.schemaTypes.length; i++) {
-            masolat[i] = this.schemaTypes[i];
+        SchemaType[] masolat = new SchemaType[schemaTypes.length];
+        for (int i = 0; i < schemaTypes.length; i++) {
+            masolat[i] = schemaTypes[i];
         }
         return masolat;
     }
@@ -32,8 +33,8 @@ public class StructuredOutput {
             return false;
         }
         
-        for (int i = 0; i < this.schemaTypes.length; i++) {
-            if (this.schemaTypes[i] == schemaType) {
+        for (int i = 0; i < schemaTypes.length; i++) {
+            if (schemaTypes[i] == schemaType) {
                 return true;
             }
         }
@@ -41,6 +42,6 @@ public class StructuredOutput {
     }
 
     public int size() {
-        return this.schemaTypes.length;
+        return schemaTypes.length;
     }
 }

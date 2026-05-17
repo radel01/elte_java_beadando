@@ -1,0 +1,19 @@
+AGENT: SzallasFoglalo
+STEP
+name=Kereses
+prompt=keress szallast budapesten a koruton belul
+systemPrompt=te egy profi utazasi tanacsado vagy
+output=STRING
+ENDSTEP
+STEP
+name=ArEllenorzes
+prompt=mennyibe kerul a legolcsobb szoba ejszakankent
+systemPrompt=nezz utana az arakat tartalmazo listanak
+output=INT
+ENDSTEP
+STEP
+name=Foglaltsag
+prompt=szabad a szoba a jovo hetvegere
+systemPrompt=ellenorizd a naptarat
+output=BOOLEAN
+ENDSTEP

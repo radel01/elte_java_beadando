@@ -15,7 +15,7 @@ public class Agent {
 
     public Agent(String name) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("A név nem lehet üres.");
+            throw new IllegalArgumentException("ures vagy null nevet adtal meg");
         }
         this.name = name;
         this.steps = new ArrayList<>();
@@ -27,7 +27,7 @@ public class Agent {
 
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("A név nem lehet üres.");
+            throw new IllegalArgumentException("ures vagy null nevet adtal meg");
         }
         this.name = name;
     }
@@ -42,12 +42,12 @@ public class Agent {
 
     public void addStep(WorkflowStep step) {
         if (step == null) {
-            throw new IllegalArgumentException("A lépés nem lehet null.");
+            throw new IllegalArgumentException("null lepest nem lehet hozzaadni");
         }
         
-        for (WorkflowStep vizsgalt : this.steps) {
-            if (vizsgalt.getName().equals(step.getName())) {
-                throw new IllegalArgumentException("Már létezik ilyen nevű lépés: " + step.getName());
+        for (WorkflowStep v : this.steps) {
+            if (v.getName().equals(step.getName())) {
+                throw new IllegalArgumentException("mar van ilyen nevu lepes");
             }
         }
         
@@ -56,114 +56,112 @@ public class Agent {
 
     public WorkflowStep findStepByName(String stepName) {
         if (stepName == null || stepName.trim().isEmpty()) {
-            throw new IllegalArgumentException("A keresett név nem lehet üres.");
+            throw new IllegalArgumentException("ures nevet kerestel");
         }
         
-        String tisztaNev = stepName.trim();
-        for (WorkflowStep vizsgalt : this.steps) {
-            if (vizsgalt.getName().equals(tisztaNev)) {
-                return vizsgalt;
+        String tNev = stepName.trim();
+        for (WorkflowStep v : this.steps) {
+            if (v.getName().equals(tNev)) {
+                return v;
             }
         }
         return null;
     }
 
     public void run() {
-        for (WorkflowStep step : this.steps) {
-            System.out.println("Lépés neve: " + step.getName());
-            System.out.println("Szimulált válasz: " + step.simulateResponse());
+        for (WorkflowStep s : this.steps) {
+            System.out.println("Lépés neve: " + s.getName());
+            System.out.println("Szimulált válasz: " + s.simulateResponse());
         }
     }
 
     public static Agent loadAgent(String filename) throws IOException, WorkflowFormatException {
         if (filename == null || filename.trim().isEmpty()) {
-            throw new IllegalArgumentException("A fájlnév nem lehet üres.");
+            throw new IllegalArgumentException("nincs megadva fajlnev");
         }
 
-        // Try-with-resources: biztosítja a fájl bezárását hiba esetén is
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String elsoSor = reader.readLine();
-            if (elsoSor == null) {
-                throw new WorkflowFormatException("A fájl üres.");
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String fejlec = br.readLine();
+            if (fejlec == null) {
+                throw new WorkflowFormatException("ures a fajl");
             }
             
-            elsoSor = elsoSor.trim();
-            if (!elsoSor.startsWith("AGENT:")) {
-                throw new WorkflowFormatException("Hiányzik az AGENT: fejléc.");
+            fejlec = fejlec.trim();
+            if (!fejlec.startsWith("AGENT:")) {
+                throw new WorkflowFormatException("nincs agent fejlec az elejen");
             }
             
-            Agent agent = new Agent(elsoSor.substring(6).trim());
+            Agent a = new Agent(fejlec.substring(6).trim());
             
             String sor;
-            while ((sor = reader.readLine()) != null) {
+            while ((sor = br.readLine()) != null) {
                 sor = sor.trim();
                 if (sor.isEmpty()) continue;
                 
                 if (sor.equals("STEP")) {
-                    WorkflowStep ujLepes = parseStep(reader);
-                    // Duplikáció ellenőrzése betöltéskor is
-                    if (agent.findStepByName(ujLepes.getName()) != null) {
-                        throw new WorkflowFormatException("Duplikált lépésnév: " + ujLepes.getName());
+                    WorkflowStep uj = parseStep(br);
+                    if (a.findStepByName(uj.getName()) != null) {
+                        throw new WorkflowFormatException("duplikalt lepes a fajlban");
                     }
-                    agent.addStep(ujLepes);
+                    a.addStep(uj);
                 } else {
-                    throw new WorkflowFormatException("Váratlan sor: " + sor);
+                    throw new WorkflowFormatException("varatlan sor jott");
                 }
             }
-            return agent;
+            return a;
         }
     }
 
-    private static WorkflowStep parseStep(BufferedReader reader) throws IOException, WorkflowFormatException {
-        String name = null;
-        String prompt = null;
-        String systemPrompt = null;
-        String outputStr = null;
-        boolean endStepFound = false;
+    private static WorkflowStep parseStep(BufferedReader br) throws IOException, WorkflowFormatException {
+        String n = null;
+        String p = null;
+        String sp = null;
+        String out = null;
+        boolean megvan = false;
         
         String sor;
-        while ((sor = reader.readLine()) != null) {
+        while ((sor = br.readLine()) != null) {
             sor = sor.trim();
             if (sor.isEmpty()) continue;
             
             if (sor.equals("ENDSTEP")) {
-                endStepFound = true;
+                megvan = true;
                 break;
             }
             
-            int egyenlosegHelye = sor.indexOf('=');
-            if (egyenlosegHelye == -1) {
-                throw new WorkflowFormatException("Nincs '=' jel a sorban: " + sor);
+            int egyenlo = sor.indexOf('=');
+            if (egyenlo == -1) {
+                throw new WorkflowFormatException("nincs egyenlosegjel");
             }
             
-            String kulcs = sor.substring(0, egyenlosegHelye).trim();
-            String ertek = sor.substring(egyenlosegHelye + 1).trim();
+            String kulcs = sor.substring(0, egyenlo).trim();
+            String ertek = sor.substring(egyenlo + 1).trim();
             
             switch (kulcs) {
-                case "name" -> name = ertek;
-                case "prompt" -> prompt = ertek;
-                case "systemPrompt" -> systemPrompt = ertek;
-                case "output" -> outputStr = ertek;
-                default -> throw new WorkflowFormatException("Ismeretlen kulcs: " + kulcs);
+                case "name" -> n = ertek;
+                case "prompt" -> p = ertek;
+                case "systemPrompt" -> sp = ertek;
+                case "output" -> out = ertek;
+                default -> throw new WorkflowFormatException("ismeretlen kulcs");
             }
         }
         
-        if (!endStepFound) {
-            throw new WorkflowFormatException("Hianyozik az ENDSTEP a fajl vegerol.");
+        if (!megvan) {
+            throw new WorkflowFormatException("hianyzik az endstep");
         }
         
-        if (name == null || prompt == null || systemPrompt == null || outputStr == null) {
-            throw new WorkflowFormatException("Hiányzó adat a lépésben.");
+        if (n == null || p == null || sp == null || out == null) {
+            throw new WorkflowFormatException("hianyos adatok a lepeshez");
         }
         
         SchemaType st;
         try {
-            st = SchemaType.valueOf(outputStr);
+            st = SchemaType.valueOf(out);
         } catch (IllegalArgumentException e) {
-            throw new WorkflowFormatException("Rossz output típus: " + outputStr);
+            throw new WorkflowFormatException("rossz kimeneti tipus");
         }
         
         StructuredOutput so = new StructuredOutput(new SchemaType[]{st});
-        return new WorkflowStep(name, prompt, systemPrompt, so);
+        return new WorkflowStep(n, p, sp, so);
     }
 }

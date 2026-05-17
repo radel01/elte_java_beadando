@@ -13,138 +13,155 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AgentTest {
+    private agentic.workflow.llm.StructuredOutputTest t1;
+    private agentic.workflow.WorkflowStepTest t2;
 
-    // Segédmetódus lépés létrehozásához
-    private WorkflowStep createDummyStep(String name) {
-        StructuredOutput out = new StructuredOutput(new SchemaType[]{SchemaType.STRING});
-        return new WorkflowStep(name, "prompt", "sys", out);
+    private WorkflowStep dummy(String n) {
+        StructuredOutput o = new StructuredOutput(new SchemaType[]{SchemaType.STRING});
+        return new WorkflowStep(n, "p", "s", o);
     }
 
     @Test
     public void testValidCreationAndNameValidation() {
-        Agent agent = new Agent("Teszt Agens");
-        assertEquals("Teszt Agens", agent.getName());
+        Agent a = new Agent("Teszt");
+        assertEquals("Teszt", a.getName());
 
-        assertThrows(IllegalArgumentException.class, () -> new Agent(null), "Null név esetén kivétel kell.");
-        assertThrows(IllegalArgumentException.class, () -> new Agent("   "), "Üres név esetén kivétel kell.");
+        assertThrows(IllegalArgumentException.class, () -> new Agent(null), "null nevnel hiba kell");
+        assertThrows(IllegalArgumentException.class, () -> new Agent("   "), "ures nevnel hiba kell");
     }
 
     @Test
     public void testAddAndFindStep() {
-        Agent agent = new Agent("Agens");
-        WorkflowStep step1 = createDummyStep("Lepes1");
-        agent.addStep(step1);
+        Agent a = new Agent("A");
+        WorkflowStep s1 = dummy("S1");
+        a.addStep(s1);
 
-        assertEquals(1, agent.getStepCount());
-        assertEquals(step1, agent.findStepByName("Lepes1"));
-        assertNull(agent.findStepByName("NemLetezo"));
+        assertEquals(1, a.getStepCount());
+        assertEquals(s1, a.findStepByName("S1"));
+        assertNull(a.findStepByName("nincs"));
     }
 
     @Test
     public void testAddDuplicateStepRejected() {
-        Agent agent = new Agent("Agens");
-        WorkflowStep step1 = createDummyStep("KozosNev");
-        WorkflowStep step2 = createDummyStep("KozosNev");
+        Agent a = new Agent("A");
+        WorkflowStep s1 = dummy("X");
+        WorkflowStep s2 = dummy("X");
 
-        agent.addStep(step1);
-        assertThrows(IllegalArgumentException.class, () -> agent.addStep(step2), "Duplikált lépésnév hozzáadása kivételt kell dobjon.");
+        a.addStep(s1);
+        assertThrows(IllegalArgumentException.class, () -> a.addStep(s2), "dupla nevnel hiba kell");
     }
 
     @Test
     public void testEncapsulationGetSteps() {
-        Agent agent = new Agent("Agens");
-        agent.addStep(createDummyStep("Lepes1"));
+        Agent a = new Agent("A");
+        a.addStep(dummy("S1"));
 
-        List<WorkflowStep> stepsCopy = agent.getSteps();
+        List<WorkflowStep> masolat = a.getSteps();
         try {
-            stepsCopy.clear(); 
+            masolat.clear(); 
         } catch (UnsupportedOperationException e) {
         }
 
-        assertEquals(1, agent.getStepCount(), "Enkapszulációs hiba: A getSteps() módosítása nem érintheti az eredetit!");
+        assertEquals(1, a.getStepCount(), "rossz enkapszulacio");
     }
 
     @Test
-    public void testLoadAgentSuccess(@TempDir Path tempDir) throws IOException, WorkflowFormatException {
-        Path file = tempDir.resolve("valid_agent.txt");
-        List<String> lines = List.of(
-            "AGENT: Hotel Booker",
+    public void testLoadAgentSuccess(@TempDir Path tmp) throws IOException, WorkflowFormatException {
+        Path f = tmp.resolve("agent.txt");
+        List<String> sorok = List.of(
+            "AGENT: Hotel",
             "STEP",
-            "name=Kereses",
-            "prompt=Keress hotelt",
-            "systemPrompt=Te egy utazasi ugynok vagy",
+            "name=Keres",
+            "prompt=p",
+            "systemPrompt=s",
             "output=STRING",
             "ENDSTEP"
         );
-        Files.write(file, lines);
+        Files.write(f, sorok);
 
-        Agent agent = Agent.loadAgent(file.toString());
-        assertEquals("Hotel Booker", agent.getName());
-        assertEquals(1, agent.getStepCount());
+        Agent a = Agent.loadAgent(f.toString());
+        assertEquals("Hotel", a.getName());
+        assertEquals(1, a.getStepCount());
     }
 
     @Test
-    public void testLoadAgentRejectsMissingHeader(@TempDir Path tempDir) throws IOException {
-        Path file = tempDir.resolve("no_header.txt");
-        Files.write(file, List.of("STEP", "name=Hiba", "ENDSTEP"));
+    public void testLoadAgentRejectsMissingHeader(@TempDir Path tmp) throws IOException {
+        Path f = tmp.resolve("rossz.txt");
+        Files.write(f, List.of("STEP", "name=H", "ENDSTEP"));
 
-        assertThrows(WorkflowFormatException.class, () -> Agent.loadAgent(file.toString()), 
-            "Ha nincs AGENT sor az elején, WorkflowFormatException-t kell dobni.");
+        assertThrows(WorkflowFormatException.class, () -> Agent.loadAgent(f.toString()), "nincs agent sor");
     }
 
     @Test
-    public void testLoadAgentRejectsDuplicateStepNames(@TempDir Path tempDir) throws IOException {
-        Path file = tempDir.resolve("dup_steps.txt");
-        Files.write(file, List.of(
-            "AGENT: Test",
+    public void testLoadAgentRejectsDuplicateStepNames(@TempDir Path tmp) throws IOException {
+        Path f = tmp.resolve("dupla.txt");
+        Files.write(f, List.of(
+            "AGENT: T",
             "STEP", "name=A", "prompt=p", "systemPrompt=s", "output=INT", "ENDSTEP",
             "STEP", "name=A", "prompt=p", "systemPrompt=s", "output=INT", "ENDSTEP"
         ));
 
-        assertThrows(WorkflowFormatException.class, () -> Agent.loadAgent(file.toString()), 
-            "Fájlból való betöltéskor a duplikált neveknek hibát kell dobniuk.");
+        assertThrows(WorkflowFormatException.class, () -> Agent.loadAgent(f.toString()), "dupla nev a fajlban nem jo");
     }
     
     @Test
-    public void testLoadAgentInvalidFormatMissingEndStep(@TempDir Path tempDir) throws IOException {
-        Path file = tempDir.resolve("missing_end.txt");
-        Files.write(file, List.of(
-            "AGENT: Rossz",
-            "STEP", "name=Hiba", "prompt=p", "systemPrompt=s", "output=STRING"
+    public void testLoadAgentInvalidFormatMissingEndStep(@TempDir Path tmp) throws IOException {
+        Path f = tmp.resolve("nincs_end.txt");
+        Files.write(f, List.of(
+            "AGENT: R",
+            "STEP", "name=H", "prompt=p", "systemPrompt=s", "output=STRING"
         ));
 
-        assertThrows(WorkflowFormatException.class, () -> Agent.loadAgent(file.toString()));
+        assertThrows(WorkflowFormatException.class, () -> Agent.loadAgent(f.toString()));
     }
-
 
     @Test
     public void findStepByName() {
-        Agent agent = new Agent("Agens");
-        WorkflowStep step1 = createDummyStep("Lepes1");
-        agent.addStep(step1);
-        assertEquals(step1, agent.findStepByName("Lepes1"));
+        Agent a = new Agent("A");
+        WorkflowStep s = dummy("S");
+        a.addStep(s);
+        assertEquals(s, a.findStepByName("S"));
     }
 
     @Test
     public void findStepByNameMissing() {
-        Agent agent = new Agent("Teszt");
-        assertNull(agent.findStepByName("NincsIlyenLepes"));
+        Agent a = new Agent("T");
+        assertNull(a.findStepByName("nincs"));
     }
 
     @Test
     public void testStepCount() {
-        Agent agent = new Agent("Agens");
-        assertEquals(0, agent.getStepCount());
-        agent.addStep(createDummyStep("Step1"));
-        assertEquals(1, agent.getStepCount());
+        Agent a = new Agent("A");
+        assertEquals(0, a.getStepCount());
+        a.addStep(dummy("S"));
+        assertEquals(1, a.getStepCount());
     }
 
     @Test
     public void testAddStep() {
-        Agent agent = new Agent("Agens");
-        WorkflowStep step = createDummyStep("Step1");
-        agent.addStep(step);
-        assertEquals(step, agent.findStepByName("Step1"));
+        Agent a = new Agent("A");
+        WorkflowStep s = dummy("S");
+        a.addStep(s);
+        assertEquals(s, a.findStepByName("S"));
+    }
+
+    @Test
+    public void testHotelBookerFile() throws Exception {
+        Agent a = Agent.loadAgent("agent_Szallasfoglalo.txt");
+        assertEquals("SzallasFoglalo", a.getName(), "rossz nev a hotelnel");
+        assertEquals(3, a.getStepCount(), "nem stimmel a lepesek szama");
+        assertNotNull(a.findStepByName("Kereses"));
+    }
+
+    @Test
+    public void testStudyCoachFile() throws Exception {
+        Agent a = Agent.loadAgent("agent_Tanulassegito.txt");
+        assertEquals("TanulasSegito", a.getName(), "rossz nev a coachnal");
+        assertEquals(3, a.getStepCount());
+        
+        WorkflowStep s = a.findStepByName("Kulcsszavak");
+        assertEquals("MAP_STRING_STRING", s.getStructuredOutput().getSchemaTypes()[0].name());
+        assertTrue(s.simulateResponse().contains("ertek"), "nem jo a map szimulacio");
     }
 
 }

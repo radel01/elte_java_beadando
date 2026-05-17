@@ -7,85 +7,66 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WorkflowStepTest {
 
-    private StructuredOutput createDummyOutput(SchemaType type) {
-        return new StructuredOutput(new SchemaType[]{type});
+    private StructuredOutput dummy(SchemaType t) {
+        return new StructuredOutput(new SchemaType[]{t});
     }
 
     @Test
     public void testValidCreationAndGetters() {
-        StructuredOutput out = createDummyOutput(SchemaType.STRING);
-        WorkflowStep step = new WorkflowStep("Lépés1", "Futtass valamit", "Te egy AI vagy", out);
+        StructuredOutput o = dummy(SchemaType.STRING);
+        WorkflowStep s = new WorkflowStep("l1", "p1", "s1", o);
         
-        assertEquals("Lépés1", step.getName(), "A name getter hibás.");
-        assertEquals("Futtass valamit", step.getPrompt(), "A prompt getter hibás.");
-        assertEquals("Te egy AI vagy", step.getSystemPrompt(), "A systemPrompt getter hibás.");
-        assertEquals(out, step.getStructuredOutput(), "A structuredOutput getter hibás.");
-        assertTrue(step.expectsStructuredOutput(), "Az expectsStructuredOutput()-nak true-t kell adnia, ha van kimenet.");
+        assertEquals("l1", s.getName(), "nev hiba");
+        assertEquals("p1", s.getPrompt(), "prompt hiba");
+        assertEquals("s1", s.getSystemPrompt(), "sysprompt hiba");
+        assertEquals(o, s.getStructuredOutput(), "output hiba");
+        assertTrue(s.expectsStructuredOutput(), "kene hogy varjon outputot");
     }
 
     @Test
     public void testNameValidation() {
-        StructuredOutput out = createDummyOutput(SchemaType.STRING);
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WorkflowStep(null, "prompt", "sysPrompt", out);
-        }, "Null name esetén kivételt kell dobni.");
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WorkflowStep("   ", "prompt", "sysPrompt", out);
-        }, "Csupa szóköz name esetén kivételt kell dobni.");
+        StructuredOutput o = dummy(SchemaType.STRING);
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowStep(null, "p", "s", o), "null nev hiba");
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowStep("  ", "p", "s", o), "ures nev hiba");
     }
 
     @Test
     public void testPromptValidation() {
-        StructuredOutput out = createDummyOutput(SchemaType.STRING);
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WorkflowStep("name", null, "sysPrompt", out);
-        });
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WorkflowStep("name", "", "sysPrompt", out);
-        });
+        StructuredOutput o = dummy(SchemaType.STRING);
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowStep("n", null, "s", o));
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowStep("n", "", "s", o));
     }
 
     @Test
     public void testSystemPromptValidation() {
-        StructuredOutput out = createDummyOutput(SchemaType.STRING);
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WorkflowStep("name", "prompt", null, out);
-        });
+        StructuredOutput o = dummy(SchemaType.STRING);
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowStep("n", "p", null, o));
     }
 
     @Test
     public void testStructuredOutputValidation() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WorkflowStep("name", "prompt", "sysPrompt", null);
-        }, "Null StructuredOutput esetén kivételt kell dobni.");
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowStep("n", "p", "s", null), "null kimenet hiba");
     }
 
     @Test
     public void testSimulateResponse() {
-        // Kipróbáljuk a különböző dummy értékeket a metódusod alapján
-        WorkflowStep stepInt = new WorkflowStep("n", "p", "sp", createDummyOutput(SchemaType.INT));
-        assertEquals("0", stepInt.simulateResponse());
+        WorkflowStep s1 = new WorkflowStep("n", "p", "s", dummy(SchemaType.INT));
+        assertEquals("0", s1.simulateResponse());
 
-        WorkflowStep stepStr = new WorkflowStep("n", "p", "sp", createDummyOutput(SchemaType.STRING));
-        assertEquals("sample", stepStr.simulateResponse());
+        WorkflowStep s2 = new WorkflowStep("n", "p", "s", dummy(SchemaType.STRING));
+        assertEquals("sample", s2.simulateResponse());
 
-        WorkflowStep stepBool = new WorkflowStep("n", "p", "sp", createDummyOutput(SchemaType.BOOLEAN));
-        assertEquals("true", stepBool.simulateResponse());
+        WorkflowStep s3 = new WorkflowStep("n", "p", "s", dummy(SchemaType.BOOLEAN));
+        assertEquals("true", s3.simulateResponse());
 
-        WorkflowStep stepListInt = new WorkflowStep("n", "p", "sp", createDummyOutput(SchemaType.LIST_INT));
-        assertEquals("[1,2,3]", stepListInt.simulateResponse());
+        WorkflowStep s4 = new WorkflowStep("n", "p", "s", dummy(SchemaType.LIST_INT));
+        assertEquals("[1,2,3]", s4.simulateResponse());
     }
 
     @Test
     public void testExpectsStructuredOutput() {
-        StructuredOutput out = createDummyOutput(SchemaType.STRING);
-        WorkflowStep step = new WorkflowStep("Step1", "Prompt", "System", out);
-        
-        assertTrue(step.expectsStructuredOutput(), "A metódusnak true-t kell visszaadnia, ha van StructuredOutput.");
+        StructuredOutput o = dummy(SchemaType.STRING);
+        WorkflowStep s = new WorkflowStep("s1", "p", "s", o);
+        assertTrue(s.expectsStructuredOutput(), "visszajelzes hiba");
     }
 }
