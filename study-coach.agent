@@ -1,0 +1,19 @@
+AGENT: Study Coach
+STEP
+name=ask_topic
+prompt=Ask the student what topic they want to revise.
+systemPrompt=Be supportive and concise.
+output=STRING
+ENDSTEP
+STEP
+name=create_quiz
+prompt=Generate three review questions.
+systemPrompt=Output a small list.
+output=LIST_STRING
+ENDSTEP
+STEP
+name=check_readiness
+prompt=Decide if the student seems ready for a quiz.
+systemPrompt=Return true or false only.
+output=BOOLEAN
+ENDSTEP

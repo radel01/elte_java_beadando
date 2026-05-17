@@ -1,0 +1,13 @@
+AGENT: Calculator Helper
+STEP
+name=collect_numbers
+prompt=Ask the user for a list of integers.
+systemPrompt=You are a precise calculator assistant.
+output=LIST_INT
+ENDSTEP
+STEP
+name=sum_numbers
+prompt=Return the sum of the integers.
+systemPrompt=Return only the numeric answer.
+output=INT
+ENDSTEP

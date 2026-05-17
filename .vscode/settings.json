@@ -1,0 +1,14 @@
+{
+    "java.project.sourcePaths": [
+        "."
+    ],
+    "java.project.referencedLibraries": [
+        "checkagent6.jar",
+        "checkthat6.jar",
+        "junit6all.jar"
+    ],
+    "java.compile.compilerArgs": [
+        "--enable-preview",
+        "--add-modules", "org.junit.jupiter"
+    ]
+}
